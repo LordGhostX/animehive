@@ -63,11 +63,16 @@ def echo(update, context):
             context.bot.send_message(
                 chat_id=chat_id, text=config["messages"]["menu"])
         else:
+            context.bot.send_message(
+                chat_id=chat_id, text="Displaying search results for {} 😁".format(title))
             for anime in anime_list:
                 markup = [[InlineKeyboardButton(
                     "Get Recommendations 🚀", callback_data="recommendation=" + str(anime["session"]))]]
                 context.bot.send_message(chat_id=chat_id, text=config["messages"]["recommendation_search"].format(
                     anime["title"], anime["type"], anime["status"], "{} {}".format(anime["season"], anime["year"])), reply_markup=InlineKeyboardMarkup(markup))
+    else:
+        context.bot.send_message(
+            chat_id=chat_id, text=config["messages"]["unknown"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
 
 
