@@ -77,7 +77,7 @@ def echo(update, context):
             for anime in anime_list:
                 markup = [[InlineKeyboardButton(
                     "Get Recommendations 🚀", callback_data="r=" + str(anime["session"]))]]
-                context.bot.send_message(chat_id=chat_id, text=config["messages"]["recommendation_search"].format(
+                context.bot.send_photo(chat_id=chat_id, photo=anime["poster"], caption=config["messages"]["recommendation_search"].format(
                     anime["title"], anime["type"], anime["status"], "{} {}".format(anime["season"], anime["year"])), reply_markup=InlineKeyboardMarkup(markup))
     elif last_command == "download":
         title = update.message.text.strip()
@@ -118,7 +118,7 @@ def button(update, context):
             context.bot.send_message(
                 chat_id=chat_id, text="Showing recommendations for {} 😇".format(title))
             for i in recommendations:
-                context.bot.send_message(chat_id=chat_id, text=config["messages"]["recommendation_result"].format(
+                context.bot.send_photo(chat_id=chat_id, photo=i["image"], caption=config["messages"]["recommendation_result"].format(
                     i["title"], i["status"], i["season"]))
     if query_data.split("=")[0] == "d":
         href = "https://animeout.xyz/" + query_data.split("=")[1]

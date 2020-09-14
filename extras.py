@@ -12,7 +12,7 @@ def search_animepahe(title):
     return r.get("data", [])
 
 
-def fetch_recommendations(anime_session):
+def fetch_recommendations(anime_session, limit=5):
     r = requests.get("https://animepahe.com/anime/" + anime_session)
     page = BeautifulSoup(r.text, "html.parser")
     title = page.find("div", {"class": "title-wrapper"}
@@ -21,12 +21,13 @@ def fetch_recommendations(anime_session):
         "div", {"class": "anime-recommendation"})
 
     recommendations = []
-    for i in recommendation_section.find_all("div", {"class": "mb-3"}):
+    for i in recommendation_section.find_all("div", {"class": "mb-3"})[:limit]:
         recommendations.append({
             "title": i.find("a")["title"],
             "type": i.find("strong").text.strip(),
             "season": i.find_all("a")[-1]["title"],
-            "status": i.find("div", {"class": "col-9 px-1"}).text.strip().split("\n")[1]
+            "status": i.find("div", {"class": "col-9 px-1"}).text.strip().split("\n")[1],
+            "image": i.find("img")["src"]
         })
     return title, recommendations
 
