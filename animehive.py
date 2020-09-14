@@ -21,9 +21,17 @@ def donate(update, context):
         chat_id=chat_id, text=config["messages"]["donate"])
 
 
+def help(update, context):
+    chat_id = update.effective_chat.id
+    context.bot.send_message(
+        chat_id=chat_id, text=config["messages"]["help"])
+
+
 start_handler = CommandHandler("start", start)
 dispatcher.add_handler(start_handler)
 donate_handler = CommandHandler("donate", donate)
 dispatcher.add_handler(donate_handler)
+help_handler = CommandHandler("help", help)
+dispatcher.add_handler(help_handler)
 
 updater.start_polling()
