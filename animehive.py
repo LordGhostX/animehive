@@ -1,6 +1,7 @@
 import os
 import json
 import datetime
+import threading
 import pymongo
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
@@ -14,6 +15,24 @@ updater = Updater(token=config["token"], use_context=True)
 dispatcher = updater.dispatcher
 client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
 db = client[config["db"]["db_name"]]
+
+
+def send_episodes(episodes, first, chat_id, context):
+    for i in episodes[first:first + 10]:
+        download_url = db.anime.find_one({"href": i})
+        if download_url:
+            download_url = download_url["download_url"]
+        else:
+            download_url = get_download_url(i)
+            db.anime.insert_one({
+                "href": i,
+                "download_url": download_url,
+                "date": datetime.datetime.now()
+            })
+        markup = [[InlineKeyboardButton(
+            "Download Episode 🔥", url=download_url)]]
+        context.bot.send_message(chat_id=chat_id, text=os.path.basename(
+            download_url), reply_markup=InlineKeyboardMarkup(markup))
 
 
 def start(update, context):
@@ -135,21 +154,9 @@ def button(update, context):
         href = "https://animeout.xyz/" + query_data.split("=")[1]
         episodes = fetch_episodes(href)
         start = int(query_data.split("=")[-1])
-        for i in episodes[start:start + 10]:
-            download_url = db.anime.find_one({"href": i})
-            if download_url:
-                download_url = download_url["download_url"]
-            else:
-                download_url = get_download_url(i)
-                db.anime.insert_one({
-                    "href": i,
-                    "download_url": download_url,
-                    "date": datetime.datetime.now()
-                })
-            markup = [[InlineKeyboardButton(
-                "Download Episode 🔥", url=download_url)]]
-            context.bot.send_message(chat_id=chat_id, text=os.path.basename(
-                download_url), reply_markup=InlineKeyboardMarkup(markup))
+        thread = threading.Thread(target=send_episodes, args=[
+            episodes, start, chat_id, context])
+        thread.start()
 
 
 start_handler = CommandHandler("start", start)
