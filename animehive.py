@@ -32,6 +32,7 @@ def donate(update, context):
     chat_id = update.effective_chat.id
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["donate"])
+    context.bot.send_message(chat_id=chat_id, text=config["messages"]["menu"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
 
 
@@ -123,10 +124,23 @@ def button(update, context):
     if query_data.split("=")[0] == "d":
         href = "https://animeout.xyz/" + query_data.split("=")[1]
         episodes = fetch_episodes(href)
-        for i in episodes:
-            markup = [[InlineKeyboardButton("Download Episode 🔥", url=i)]]
+        context.bot.send_message(
+            chat_id=chat_id, text=config["messages"]["download_pagination"].format(len(episodes)))
+        for i in range(0, len(episodes), 10):
+            markup = [[InlineKeyboardButton(
+                "Get Episodes 🚀", callback_data="f={}={}".format(query_data.split("=")[1], i))]]
+            context.bot.send_message(
+                chat_id=chat_id, text="Download Episodes {} - {}".format(i + 1, min(i + 10, len(episodes))), reply_markup=InlineKeyboardMarkup(markup))
+    if query_data.split("=")[0] == "f":
+        href = "https://animeout.xyz/" + query_data.split("=")[1]
+        episodes = fetch_episodes(href)
+        start = int(query_data.split("=")[-1])
+        for i in episodes[start:start + 10]:
+            download_url = get_download_url(i)
+            markup = [[InlineKeyboardButton(
+                "Download Episode 🔥", url=download_url)]]
             context.bot.send_message(chat_id=chat_id, text=os.path.basename(
-                i), reply_markup=InlineKeyboardMarkup(markup))
+                download_url), reply_markup=InlineKeyboardMarkup(markup))
 
 
 start_handler = CommandHandler("start", start)

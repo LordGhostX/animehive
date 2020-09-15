@@ -12,7 +12,7 @@ def search_animepahe(title):
     return r.get("data", [])
 
 
-def fetch_recommendations(anime_session, limit=5):
+def fetch_recommendations(anime_session, limit=8):
     r = requests.get("https://animepahe.com/anime/" + anime_session)
     page = BeautifulSoup(r.text, "html.parser")
     title = page.find("div", {"class": "title-wrapper"}
@@ -58,8 +58,8 @@ def fetch_episodes(href):
     episodes = []
     for i in page.find_all("a"):
         try:
-            if i["href"][-3:] in ["mkv", "mp4]"]:
-                episodes.append(get_download_url(i["href"]))
+            if i["href"][-3:] == "mkv":
+                episodes.append(i["href"])
         except:
             pass
     return episodes
