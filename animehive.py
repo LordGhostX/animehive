@@ -18,7 +18,7 @@ db = client[config["db"]["db_name"]]
 
 
 def send_episodes(episodes, first, chat_id, context):
-    for i in episodes[first:first + 10]:
+    for i in episodes[first:first + 15]:
         download_url = db.anime.find_one({"href": i})
         if download_url:
             download_url = download_url["download_url"]
@@ -33,6 +33,12 @@ def send_episodes(episodes, first, chat_id, context):
             "Download Episode 🔥", url=download_url)]]
         context.bot.send_message(chat_id=chat_id, text=os.path.basename(
             download_url), reply_markup=InlineKeyboardMarkup(markup))
+
+
+def send_recommendations(recommendations, chat_id, context):
+    for i in recommendations:
+        context.bot.send_photo(chat_id=chat_id, photo=i["image"], caption=config["messages"]["recommendation_result"].format(
+            i["title"], i["status"], i["season"]))
 
 
 def start(update, context):
@@ -137,19 +143,19 @@ def button(update, context):
         else:
             context.bot.send_message(
                 chat_id=chat_id, text="Showing recommendations for {} 😇".format(title))
-            for i in recommendations:
-                context.bot.send_photo(chat_id=chat_id, photo=i["image"], caption=config["messages"]["recommendation_result"].format(
-                    i["title"], i["status"], i["season"]))
+            thread = threading.Thread(target=send_recommendations, args=[
+                                      recommendations, chat_id, context])
+            thread.start()
     if query_data.split("=")[0] == "d":
         href = "https://animeout.xyz/" + query_data.split("=")[1]
         episodes = fetch_episodes(href)
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["download_pagination"].format(len(episodes)))
-        for i in range(0, len(episodes), 10):
+        for i in range(0, len(episodes), 15):
             markup = [[InlineKeyboardButton(
                 "Get Episodes 🚀", callback_data="f={}={}".format(query_data.split("=")[1], i))]]
             context.bot.send_message(
-                chat_id=chat_id, text="Download Episodes {} - {}".format(i + 1, min(i + 10, len(episodes))), reply_markup=InlineKeyboardMarkup(markup))
+                chat_id=chat_id, text="Download Episodes {} - {}".format(i + 1, min(i + 15, len(episodes))), reply_markup=InlineKeyboardMarkup(markup))
     if query_data.split("=")[0] == "f":
         href = "https://animeout.xyz/" + query_data.split("=")[1]
         episodes = fetch_episodes(href)

@@ -16,7 +16,7 @@
     "recommendation_search": "{} 😎\n\n{} - {} 📺\n{} ⏰",
     "recommendation_result": "{} 😎\n\n{} 📺\n{} ⏰",
     "download": "Enter the anime you want to download 😋",
-    "download_pagination": "AnimeHive scraped {} episodes for the requested anime (this might include both 720p and 1080p versions) 😁\n\nFor limiting purposes we only allow displaying of 10 episodes per request 😊",
+    "download_pagination": "AnimeHive scraped {} episodes for the requested anime (this might include both 720p and 1080p versions) 😁\n\nFor limiting purposes we only allow displaying of 15 episodes per request 😊",
     "donate": "AnimeHive is free to use meaning you don't ever pay to use the service. However, we accept donations to keep our servers and scrapers working. Feel free to donate to the service with cryptocurrency ❤️\n\nBitcoin: 1KjA4Q8e13cKawahZC6PzBjsQTY145vK3J\n\nEthereum: 0x80aa0F0BF45C36F04188C42199D38B5584991608\n\nLitecoin: ltc1q940edxufgmhxx5fhanxapajdaecscngv8nkc3v\n\nBitcoin Cash: qzwaw3m0ndk8suk59ppvs9p9n2rynrzgtggsa0xjg5"
   }
 }
