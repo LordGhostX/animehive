@@ -35,6 +35,14 @@ def send_episodes(episodes, first, chat_id, context):
             download_url), reply_markup=InlineKeyboardMarkup(markup))
 
 
+def send_episode_list(episodes, chat_id, query_data, context):
+    for i in range(0, len(episodes), 15):
+        markup = [[InlineKeyboardButton(
+            "Get Episodes 🚀", callback_data="f={}={}".format(query_data.split("=")[1], i))]]
+        context.bot.send_message(
+            chat_id=chat_id, text="Download Episodes {} - {}".format(i + 1, min(i + 15, len(episodes))), reply_markup=InlineKeyboardMarkup(markup))
+
+
 def send_recommendations(recommendations, chat_id, context):
     for i in recommendations:
         context.bot.send_photo(chat_id=chat_id, photo=i["image"], caption=config["messages"]["recommendation_result"].format(
@@ -151,11 +159,10 @@ def button(update, context):
         episodes = fetch_episodes(href)
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["download_pagination"].format(len(episodes)))
-        for i in range(0, len(episodes), 15):
-            markup = [[InlineKeyboardButton(
-                "Get Episodes 🚀", callback_data="f={}={}".format(query_data.split("=")[1], i))]]
-            context.bot.send_message(
-                chat_id=chat_id, text="Download Episodes {} - {}".format(i + 1, min(i + 15, len(episodes))), reply_markup=InlineKeyboardMarkup(markup))
+        thread = threading.Thread(target=send_episode_list, args=[
+                                  episodes, chat_id, query_data, context])
+        thread.start()
+
     if query_data.split("=")[0] == "f":
         href = "https://animeout.xyz/" + query_data.split("=")[1]
         episodes = fetch_episodes(href)
