@@ -136,7 +136,16 @@ def button(update, context):
         episodes = fetch_episodes(href)
         start = int(query_data.split("=")[-1])
         for i in episodes[start:start + 10]:
-            download_url = get_download_url(i)
+            download_url = db.anime.find_one({"href": i})
+            if download_url:
+                download_url = download_url["download_url"]
+            else:
+                download_url = get_download_url(i)
+                db.anime.insert_one({
+                    "href": i,
+                    "download_url": download_url,
+                    "date": datetime.datetime.now()
+                })
             markup = [[InlineKeyboardButton(
                 "Download Episode 🔥", url=download_url)]]
             context.bot.send_message(chat_id=chat_id, text=os.path.basename(
