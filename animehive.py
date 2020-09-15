@@ -49,6 +49,26 @@ def send_recommendations(recommendations, chat_id, context):
             i["title"], i["status"], i["season"]))
 
 
+def send_recommend_search(anime_list, chat_id, context):
+    for anime in anime_list:
+        markup = [[InlineKeyboardButton(
+            "Get Recommendations 🚀", callback_data="r=" + str(anime["session"]))]]
+        context.bot.send_photo(chat_id=chat_id, photo=anime["poster"], caption=config["messages"]["recommendation_search"].format(
+            anime["title"], anime["type"], anime["status"], "{} {}".format(anime["season"], anime["year"])), reply_markup=InlineKeyboardMarkup(markup))
+
+
+def send_download_search(anime_list, chat_id, context):
+    for anime in anime_list:
+        try:
+            href = anime["href"][25:-1]
+            markup = [[InlineKeyboardButton(
+                "Get Episodes 🚀", callback_data="d=" + href)]]
+            context.bot.send_photo(
+                chat_id=chat_id, caption=anime["title"], photo=anime["image"], reply_markup=InlineKeyboardMarkup(markup))
+        except:
+            pass
+
+
 def start(update, context):
     chat_id = update.effective_chat.id
     first_name = update["message"]["chat"]["first_name"]
@@ -108,11 +128,10 @@ def echo(update, context):
         else:
             context.bot.send_message(
                 chat_id=chat_id, text="Displaying search results for {} 😁".format(title))
-            for anime in anime_list:
-                markup = [[InlineKeyboardButton(
-                    "Get Recommendations 🚀", callback_data="r=" + str(anime["session"]))]]
-                context.bot.send_photo(chat_id=chat_id, photo=anime["poster"], caption=config["messages"]["recommendation_search"].format(
-                    anime["title"], anime["type"], anime["status"], "{} {}".format(anime["season"], anime["year"])), reply_markup=InlineKeyboardMarkup(markup))
+            thread = threading.Thread(target=send_recommend_search, args=[
+                                      anime_list, chat_id, context])
+            thread.start()
+
     elif last_command == "download":
         title = update.message.text.strip()
         anime_list = search_animeout(title)
@@ -124,15 +143,9 @@ def echo(update, context):
         else:
             context.bot.send_message(
                 chat_id=chat_id, text="Displaying search results for {} 😁".format(title))
-            for anime in anime_list:
-                try:
-                    href = anime["href"][25:-1]
-                    markup = [[InlineKeyboardButton(
-                        "Get Episodes 🚀", callback_data="d=" + href)]]
-                    context.bot.send_photo(
-                        chat_id=chat_id, caption=anime["title"], photo=anime["image"], reply_markup=InlineKeyboardMarkup(markup))
-                except:
-                    pass
+            thread = threading.Thread(target=send_download_search, args=[
+                                      anime_list, chat_id, context])
+            thread.start()
     else:
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["unknown"])
