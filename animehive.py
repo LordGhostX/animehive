@@ -19,20 +19,23 @@ db = client[config["db"]["db_name"]]
 
 def send_episodes(episodes, first, chat_id, context):
     for i in episodes[first:first + 15]:
-        download_url = db.anime.find_one({"href": i})
-        if download_url:
-            download_url = download_url["download_url"]
-        else:
-            download_url = get_download_url(i)
-            db.anime.insert_one({
-                "href": i,
-                "download_url": download_url,
-                "date": datetime.datetime.now()
-            })
-        markup = [[InlineKeyboardButton(
-            "Download Episode 🔥", url=download_url)]]
-        context.bot.send_message(chat_id=chat_id, text=os.path.basename(
-            download_url), reply_markup=InlineKeyboardMarkup(markup))
+        try:
+            download_url = db.anime.find_one({"href": i})
+            if download_url:
+                download_url = download_url["download_url"]
+            else:
+                download_url = get_download_url(i)
+                db.anime.insert_one({
+                    "href": i,
+                    "download_url": download_url,
+                    "date": datetime.datetime.now()
+                })
+            markup = [[InlineKeyboardButton(
+                "Download Episode 🔥", url=download_url)]]
+            context.bot.send_message(chat_id=chat_id, text=os.path.basename(
+                download_url), reply_markup=InlineKeyboardMarkup(markup))
+        except:
+            pass
 
 
 def send_episode_list(episodes, chat_id, query_data, context):

@@ -12,7 +12,7 @@ def search_animepahe(title):
     return r.get("data", [])
 
 
-def fetch_recommendations(anime_session, limit=8):
+def fetch_recommendations(anime_session, limit=5):
     r = requests.get("https://animepahe.com/anime/" + anime_session)
     page = BeautifulSoup(r.text, "html.parser")
     title = page.find("div", {"class": "title-wrapper"}
