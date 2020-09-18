@@ -24,6 +24,7 @@ def fetch_recommendations(anime_session, limit=5):
     for i in recommendation_section.find_all("div", {"class": "mb-3"})[:limit]:
         recommendations.append({
             "title": i.find("a")["title"],
+            "session": i.find("a")["href"].split("/")[-1],
             "type": i.find("strong").text.strip(),
             "season": i.find_all("a")[-1]["title"],
             "status": i.find("div", {"class": "col-9 px-1"}).text.strip().split("\n")[1],
@@ -75,3 +76,19 @@ def get_download_url(href):
     download_url = download_page.find(
         "script", {"src": None}).contents[0].split('"')[1]
     return download_url
+
+
+def fetch_anime_info(session):
+    r = requests.get("https://animepahe.com/anime/" + session)
+    page = BeautifulSoup(r.text, "html.parser")
+    return {
+        "poster": page.find("a", {"class": "youtube-preview"})["href"],
+        "synopsis": page.find("div", {"class": "anime-synopsis"}).text.strip(),
+        "english": page.find("div", {"class": "anime-info"}).find_all("p")[0].text.strip(),
+        "type": page.find("div", {"class": "anime-info"}).find_all("p")[1].text.strip(),
+        "episodes": page.find("div", {"class": "anime-info"}).find_all("p")[2].text.strip(),
+        "status": " ".join(page.find("div", {"class": "anime-info"}).find_all("p")[3].text.strip().split("\n")),
+        "aired": " ".join(page.find("div", {"class": "anime-info"}).find_all("p")[4].text.strip().split("\n")),
+        "season": " ".join(page.find("div", {"class": "anime-info"}).find_all("p")[5].text.strip().split("\n")),
+        "genre": [i.text.strip() for i in page.find("div", {"class": "anime-genre"}).find_all("li")]
+    }

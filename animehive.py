@@ -48,8 +48,10 @@ def send_episode_list(episodes, chat_id, query_data, context):
 
 def send_recommendations(recommendations, chat_id, context):
     for i in recommendations:
+        markup = [[InlineKeyboardButton(
+            "Get Anime Info ℹ️", callback_data="i=" + i["session"])]]
         context.bot.send_photo(chat_id=chat_id, photo=i["image"], caption=config["messages"]["recommendation_result"].format(
-            i["title"], i["status"], i["season"]))
+            i["title"], i["status"], i["season"]), reply_markup=InlineKeyboardMarkup(markup))
 
 
 def send_recommend_search(anime_list, chat_id, context):
@@ -178,7 +180,6 @@ def button(update, context):
         thread = threading.Thread(target=send_episode_list, args=[
                                   episodes, chat_id, query_data, context])
         thread.start()
-
     if query_data.split("=")[0] == "f":
         href = "https://animeout.xyz/" + query_data.split("=")[1]
         episodes = fetch_episodes(href)
@@ -186,6 +187,13 @@ def button(update, context):
         thread = threading.Thread(target=send_episodes, args=[
             episodes, start, chat_id, context])
         thread.start()
+    if query_data.split("=")[0] == "i":
+        anime_info = fetch_anime_info(query_data.split("=")[1])
+        markup = [[InlineKeyboardButton(
+            "Get Recommendations 🚀", callback_data="r=" + query_data.split("=")[1])]]
+        context.bot.send_photo(chat_id=chat_id, photo=anime_info["poster"])
+        context.bot.send_message(chat_id=chat_id, text=config["messages"]["anime_info"].format(
+            *list(anime_info.values())[1:-1] + [", ".join(anime_info["genre"])]), reply_markup=InlineKeyboardMarkup(markup))
 
 
 start_handler = CommandHandler("start", start)
