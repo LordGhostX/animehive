@@ -182,17 +182,21 @@ def button(update, context):
     chat_id = update.effective_chat.id
     query_data = update.callback_query.data
     if query_data.split("=")[0] == "r":
-        title, recommendations = fetch_recommendations(
-            query_data.split("=")[1])
-        if len(recommendations) == 0:
+        try:
+            title, recommendations = fetch_recommendations(
+                query_data.split("=")[1])
+            if len(recommendations) == 0:
+                context.bot.send_message(
+                    chat_id=chat_id, text=config["messages"]["empty_recommendation"])
+            else:
+                context.bot.send_message(
+                    chat_id=chat_id, text="Showing recommendations for {} 😇".format(title))
+                thread = threading.Thread(target=send_recommendations, args=[
+                                          recommendations, chat_id, context])
+                thread.start()
+        except:
             context.bot.send_message(
                 chat_id=chat_id, text=config["messages"]["empty_recommendation"])
-        else:
-            context.bot.send_message(
-                chat_id=chat_id, text="Showing recommendations for {} 😇".format(title))
-            thread = threading.Thread(target=send_recommendations, args=[
-                                      recommendations, chat_id, context])
-            thread.start()
     if query_data.split("=")[0] == "d":
         href = "https://animeout.xyz/" + query_data.split("=")[1]
         episodes = fetch_episodes(href)
