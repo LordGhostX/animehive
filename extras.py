@@ -81,8 +81,12 @@ def get_download_url(href):
 def fetch_anime_info(session):
     r = requests.get("https://animepahe.com/anime/" + session)
     page = BeautifulSoup(r.text, "html.parser")
+    try:
+        poster = page.find("a", {"class": "youtube-preview"})["href"]
+    except:
+        poster = page.find("a", {"class": "poster-image"})["href"]
     return {
-        "poster": page.find("a", {"class": "youtube-preview"})["href"],
+        "poster": poster,
         "synopsis": page.find("div", {"class": "anime-synopsis"}).text.strip(),
         "english": page.find("div", {"class": "anime-info"}).find_all("p")[0].text.strip(),
         "type": page.find("div", {"class": "anime-info"}).find_all("p")[1].text.strip(),

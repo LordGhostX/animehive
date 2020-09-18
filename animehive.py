@@ -57,7 +57,7 @@ def send_recommendations(recommendations, chat_id, context):
 def send_recommend_search(anime_list, chat_id, context):
     for anime in anime_list:
         markup = [[InlineKeyboardButton(
-            "Get Recommendations 🚀", callback_data="r=" + str(anime["session"]))]]
+            "Get Recommendations 🚀", callback_data="r=" + anime["session"])]]
         context.bot.send_photo(chat_id=chat_id, photo=anime["poster"], caption=config["messages"]["recommendation_search"].format(
             anime["title"], anime["type"], anime["status"], "{} {}".format(anime["season"], anime["year"])), reply_markup=InlineKeyboardMarkup(markup))
 
@@ -117,6 +117,14 @@ def download(update, context):
                         "$set": {"last_command": "download"}})
 
 
+def get_info(update, context):
+    chat_id = update.effective_chat.id
+    context.bot.send_message(
+        chat_id=chat_id, text=config["messages"]["get_info"])
+    db.users.update_one({"chat_id": chat_id}, {
+                        "$set": {"last_command": "get_info"}})
+
+
 def echo(update, context):
     chat_id = update.effective_chat.id
     bot_user = db.users.find_one({"chat_id": chat_id})
@@ -136,7 +144,6 @@ def echo(update, context):
             thread = threading.Thread(target=send_recommend_search, args=[
                                       anime_list, chat_id, context])
             thread.start()
-
     elif last_command == "download":
         title = update.message.text.strip()
         anime_list = search_animeout(title)
@@ -151,6 +158,20 @@ def echo(update, context):
             thread = threading.Thread(target=send_download_search, args=[
                                       anime_list, chat_id, context])
             thread.start()
+    elif last_command == "get_info":
+        title = update.message.text.strip()
+        anime_list = search_animepahe(title)
+        if len(anime_list) == 0:
+            context.bot.send_message(
+                chat_id=chat_id, text=config["messages"]["empty_search"])
+            context.bot.send_message(
+                chat_id=chat_id, text=config["messages"]["menu"])
+        else:
+            for anime in anime_list:
+                markup = [[InlineKeyboardButton(
+                    "Get Anime Info ℹ️", callback_data="i=" + anime["session"])]]
+                context.bot.send_photo(chat_id=chat_id, photo=anime["poster"], caption=config["messages"]["recommendation_result"].format(
+                    anime["title"], anime["status"], "{} {}".format(anime["season"], anime["year"])), reply_markup=InlineKeyboardMarkup(markup))
     else:
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["unknown"])
@@ -206,6 +227,8 @@ recommend_handler = CommandHandler("recommend", recommend)
 dispatcher.add_handler(recommend_handler)
 download_handler = CommandHandler("download", download)
 dispatcher.add_handler(download_handler)
+get_info_handler = CommandHandler("info", get_info)
+dispatcher.add_handler(get_info_handler)
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 dispatcher.add_handler(echo_handler)
 button_handler = CallbackQueryHandler(button)
