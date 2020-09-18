@@ -189,6 +189,8 @@ def button(update, context):
                 context.bot.send_message(
                     chat_id=chat_id, text=config["messages"]["empty_recommendation"])
             else:
+                db.recommendations.insert_many([{"chat_id": chat_id, "anime": query_data.split("=")[
+                                               1], "session": i["session"], "date": datetime.datetime.now()} for i in recommendations])
                 context.bot.send_message(
                     chat_id=chat_id, text="Showing recommendations for {} 😇".format(title))
                 thread = threading.Thread(target=send_recommendations, args=[
@@ -213,6 +215,8 @@ def button(update, context):
             episodes, start, chat_id, context])
         thread.start()
     if query_data.split("=")[0] == "i":
+        db.info.insert_one({"chat_id": chat_id, "anime": query_data.split("=")[
+                           1], "date": datetime.datetime.now()})
         anime_info = fetch_anime_info(query_data.split("=")[1])
         markup = [[InlineKeyboardButton(
             "Get Recommendations 🚀", callback_data="r=" + query_data.split("=")[1])]]
