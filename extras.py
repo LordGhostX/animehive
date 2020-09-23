@@ -2,6 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 
 
+def parse_anime_name(name):
+    return ("]".join(name.split("]")[1:2]) + "]").strip()
+
+
 def search_animepahe(title):
     params = {
         "m": "search",

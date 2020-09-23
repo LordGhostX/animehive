@@ -1,4 +1,3 @@
-import os
 import json
 import datetime
 import threading
@@ -32,7 +31,7 @@ def send_episodes(episodes, first, chat_id, context):
                 })
             markup = [[InlineKeyboardButton(
                 "Download Episode 🔥", url=download_url)]]
-            context.bot.send_message(chat_id=chat_id, text=os.path.basename(
+            context.bot.send_message(chat_id=chat_id, text=parse_anime_name(
                 download_url), reply_markup=InlineKeyboardMarkup(markup))
         except:
             pass
