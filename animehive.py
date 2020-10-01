@@ -4,6 +4,7 @@ import threading
 from multiprocessing import Pool
 import pymongo
 import telegram
+from bson.objectid import ObjectId
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import CallbackQueryHandler
@@ -68,8 +69,15 @@ def send_download_search(anime_list, chat_id, context):
     for anime in anime_list:
         try:
             href = anime["href"][25:-1]
+            shortened_url = db.shortened_urls.find_one({"href": href})
+            if shortened_url:
+                shortened_url = str(shortened_url["_id"])
+            else:
+                shortened_url = db.shortened_urls.insert_one(
+                    {"href": href, "date": datetime.datetime.now()})
+                shortened_url = str(shortened_url.inserted_id)
             markup = [[InlineKeyboardButton(
-                "Get Episodes 🚀", callback_data="d=" + href)]]
+                "Get Episodes 🚀", callback_data="d=" + shortened_url)]]
             context.bot.send_photo(
                 chat_id=chat_id, caption=anime["title"], photo=anime["image"], reply_markup=InlineKeyboardMarkup(markup))
         except:
@@ -113,8 +121,12 @@ def donate(update, context):
 
 def help(update, context):
     chat_id = update.effective_chat.id
+    total_users = db.users.count_documents({})
+    total_downloaded = db.anime.count_documents({})
+    total_recommendations = db.recommendations.count_documents({})
+    total_info = db.info.count_documents({})
     context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["help"])
+        chat_id=chat_id, text=config["messages"]["help"].format(total_users, total_downloaded, total_recommendations, total_info))
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
 
 
@@ -235,7 +247,9 @@ def button(update, context):
             context.bot.send_message(
                 chat_id=chat_id, text=config["messages"]["empty_recommendation"])
     if query_data.split("=")[0] == "d":
-        href = "https://animeout.xyz/" + query_data.split("=")[1]
+        href = "https://animeout.xyz/" + \
+            db.shortened_urls.find_one(
+                {"_id": ObjectId(query_data.split("=")[1])})["href"]
         episodes = fetch_episodes(href)
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["download_pagination"].format(len(episodes)))
@@ -243,7 +257,9 @@ def button(update, context):
                                   episodes, chat_id, query_data, context])
         thread.start()
     if query_data.split("=")[0] == "f":
-        href = "https://animeout.xyz/" + query_data.split("=")[1]
+        href = "https://animeout.xyz/" + \
+            db.shortened_urls.find_one(
+                {"_id": ObjectId(query_data.split("=")[1])})["href"]
         episodes = fetch_episodes(href)
         start = int(query_data.split("=")[-1])
         thread = threading.Thread(target=send_episodes, args=[
