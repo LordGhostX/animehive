@@ -8,7 +8,7 @@
   "messages": {
     "start": "Hi {}, Welcome to AnimeHive 🤖\n\nI help download and stream your favorite anime from telegram without ads. I also provide anime recommendations so you never run of anime to watch 🥳🥳🥳",
     "menu": "What do you wanna do today 🤗\n\n/download ☁️\n/recommend 🧐\n/info ℹ️\n/donate ❤️\n/help ℹ️",
-    "help": "Instructions for using AnimeHive ℹ️\n\n/start - start the bot\n/download - download or stream anime\n/recommend - get anime recommendations\n/info - get info about an anime\n/donate - donate to the bot\n/help - learn how the bot works",
+    "help": "Instructions for using AnimeHive ℹ️\n\n/start - start the bot\n/download - download or stream anime\n/recommend - get anime recommendations\n/info - get info about an anime\n/donate - donate to the bot\n/help - learn how the bot works\n\n👥 Total Bot Users - {:,}\n☁️ Total Anime Downloaded - {:,}\n🧐 Total Recommendations Given - {:,}\nℹ️ Total Anime Info Fetched - {:,}",
     "recommend": "Enter the anime you want recommendations for 😋",
     "empty_search": "We couldn't find the anime you searched for, check the spelling and try again 😣",
     "empty_recommendation": "We couldn't find any recommendation for the anime you searched for, please search for another one 😣",

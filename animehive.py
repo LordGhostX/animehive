@@ -121,8 +121,12 @@ def donate(update, context):
 
 def help(update, context):
     chat_id = update.effective_chat.id
+    total_users = db.users.count_documents({})
+    total_downloaded = db.anime.count_documents({})
+    total_recommendations = db.recommendations.count_documents({})
+    total_info = db.info.count_documents({})
     context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["help"])
+        chat_id=chat_id, text=config["messages"]["help"].format(total_users, total_downloaded, total_recommendations, total_info))
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
 
 
