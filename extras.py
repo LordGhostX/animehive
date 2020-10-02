@@ -1,3 +1,4 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 
@@ -48,11 +49,13 @@ def search_animeout(title):
             image = i.find("img")["src"]
         except:
             image = None
-        search_result.append({
-            "title": i.find("h3", {"class": "post-title"}).text.strip(),
-            "href": i.find("h3", {"class": "post-title"}).find("a")["href"],
-            "image": image
-        })
+        href = i.find("h3", {"class": "post-title"}).find("a")["href"]
+        if href != "https://www.animeout.xyz/projects-list/":
+            search_result.append({
+                "title": i.find("h3", {"class": "post-title"}).text.strip(),
+                "href": href,
+                "image": image
+            })
     return search_result
 
 
@@ -67,7 +70,7 @@ def fetch_episodes(href):
                 episodes.append(i["href"])
         except:
             pass
-    return episodes
+    return sorted(episodes, key=lambda x: os.path.basename(x))
 
 
 def get_download_url(href):
