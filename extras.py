@@ -62,7 +62,6 @@ def search_animeout(title):
 def fetch_episodes(href):
     r = requests.get(href)
     page = BeautifulSoup(r.text, "html.parser")
-
     episodes = []
     for i in page.find_all("a"):
         try:
@@ -70,7 +69,7 @@ def fetch_episodes(href):
                 episodes.append(i["href"])
         except:
             pass
-    return sorted(episodes, key=lambda x: os.path.basename(x))
+    return episodes
 
 
 def get_download_url(href):
