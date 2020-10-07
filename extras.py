@@ -4,7 +4,10 @@ from bs4 import BeautifulSoup
 
 
 def parse_anime_name(name):
-    return ("]".join(name.split("]")[1:2]) + "]").strip()
+    new_name = ("]".join(name.split("]")[1:2]) + "]").strip()
+    if new_name in ["[RapidBot]", "[]"]:
+        new_name = os.path.basename(name)
+    return new_name
 
 
 def search_animepahe(title):
