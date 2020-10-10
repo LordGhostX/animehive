@@ -152,7 +152,7 @@ def button_thread(update, context):
                 if download_url:
                     download_url = download_url["download_url"]
                 else:
-                    download_url = get_animeout_download(i)
+                    download_url = fetch_animeout_download(i)
                     db.anime.insert_one({
                         "href": i,
                         "download_url": download_url,

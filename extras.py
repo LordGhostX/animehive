@@ -29,6 +29,26 @@ def fetch_animepahe_recommendations(anime_session, limit=5):
     return title, recommendations
 
 
+def fetch_animepahe_info(session):
+    r = requests.get(f"https://animepahe.com/anime/{session}")
+    page = BeautifulSoup(r.text, "html.parser")
+    try:
+        poster = page.find("a", {"class": "youtube-preview"})["href"]
+    except:
+        poster = page.find("a", {"class": "poster-image"})["href"]
+    return {
+        "poster": poster,
+        "synopsis": page.find("div", {"class": "anime-synopsis"}).text.strip(),
+        "english": page.find("div", {"class": "anime-info"}).find_all("p")[0].text.strip(),
+        "type": page.find("div", {"class": "anime-info"}).find_all("p")[1].text.strip(),
+        "episodes": page.find("div", {"class": "anime-info"}).find_all("p")[2].text.strip(),
+        "status": " ".join(page.find("div", {"class": "anime-info"}).find_all("p")[3].text.strip().split("\n")),
+        "aired": " ".join(page.find("div", {"class": "anime-info"}).find_all("p")[4].text.strip().split("\n")),
+        "season": " ".join(page.find("div", {"class": "anime-info"}).find_all("p")[5].text.strip().split("\n")),
+        "genre": [i.text.strip() for i in page.find("div", {"class": "anime-genre"}).find_all("li")]
+    }
+
+
 def search_animeout(title):
     r = requests.get(f"https://www.animeout.xyz?s={title}")
     page = BeautifulSoup(r.text, "html.parser")
@@ -52,6 +72,7 @@ def search_animeout(title):
 def fetch_animeout_episodes(href):
     r = requests.get(href)
     page = BeautifulSoup(r.text, "html.parser")
+
     episodes = []
     for i in page.find_all("a"):
         try:
@@ -62,7 +83,7 @@ def fetch_animeout_episodes(href):
     return episodes
 
 
-def get_animeout_download(href):
+def fetch_animeout_download(href):
     r = requests.get(href)
     pre_download_page = BeautifulSoup(r.text, "html.parser")
     pre_download_url = pre_download_page.find("a", {"class": "btn"})["href"]
@@ -74,21 +95,68 @@ def get_animeout_download(href):
     return download_url
 
 
-def fetch_animepahe_info(session):
-    r = requests.get(f"https://animepahe.com/anime/{session}")
+def search_gogoanime(title):
+    r = requests.get(f"https://gogoanime.so//search.html?keyword={title}")
     page = BeautifulSoup(r.text, "html.parser")
-    try:
-        poster = page.find("a", {"class": "youtube-preview"})["href"]
-    except:
-        poster = page.find("a", {"class": "poster-image"})["href"]
-    return {
-        "poster": poster,
-        "synopsis": page.find("div", {"class": "anime-synopsis"}).text.strip(),
-        "english": page.find("div", {"class": "anime-info"}).find_all("p")[0].text.strip(),
-        "type": page.find("div", {"class": "anime-info"}).find_all("p")[1].text.strip(),
-        "episodes": page.find("div", {"class": "anime-info"}).find_all("p")[2].text.strip(),
-        "status": " ".join(page.find("div", {"class": "anime-info"}).find_all("p")[3].text.strip().split("\n")),
-        "aired": " ".join(page.find("div", {"class": "anime-info"}).find_all("p")[4].text.strip().split("\n")),
-        "season": " ".join(page.find("div", {"class": "anime-info"}).find_all("p")[5].text.strip().split("\n")),
-        "genre": [i.text.strip() for i in page.find("div", {"class": "anime-genre"}).find_all("li")]
-    }
+
+    search_result = []
+    for i in page.find("ul", {"class": "items"}).find_all("li"):
+        try:
+            search_result.append({
+                "href": i.find("a")["href"],
+                "title": i.find("p", {"class": "name"}).text.strip(),
+                "released": i.find("p", {"class": "released"}).text.strip(),
+                "image": i.find("img")["src"]
+            })
+        except:
+            pass
+    return search_result
+
+
+def fetch_gogoanime_anime(href):
+    r = requests.get(f"https://gogoanime.so{href}")
+    page = BeautifulSoup(r.text, "html.parser")
+    total_episodes = page.find("ul", {"id": "episode_page"}).find_all(
+        "li")[-1].find("a")["ep_end"]
+    alias = page.find("input", {"id": "alias_anime"})["value"]
+    anime_id = page.find("input", {"id": "movie_id"})["value"]
+
+    return int(total_episodes), alias, anime_id
+
+
+def fetch_gogoanime_episodes(start, end, alias, anime_id):
+    r = requests.get(
+        f"https://ajax.gogocdn.net/ajax/load-list-episode?ep_start={start}&ep_end={end}&id={anime_id}&default_ep=0&alias={alias}")
+    page = BeautifulSoup(r.text, "html.parser")
+
+    episodes = []
+    for i in page.find_all("li"):
+        try:
+            episodes.append({
+                "href": i.find("a")["href"].strip(),
+                "name": i.find("div", {"class": "name"}).text.strip()
+            })
+        except:
+            pass
+    return episodes[::-1]
+
+
+def fetch_gogoanime_download(href):
+    r = requests.get(f"https://gogoanime.so{href}")
+    pre_download_page = BeautifulSoup(r.text, "html.parser")
+    pre_download_url = pre_download_page.find(
+        "li", {"class": "dowloads"}).find("a")["href"]
+
+    r = requests.get(pre_download_url)
+    download_page = BeautifulSoup(r.text, "html.parser")
+    download_links = []
+
+    for i in download_page.find_all("div", {"class": "dowload"}):
+        try:
+            download_links.append({
+                "name": " ".join([i.strip() for i in i.text.split("\n")]),
+                "href": i.find("a")["href"]
+            })
+        except:
+            pass
+    return download_links
