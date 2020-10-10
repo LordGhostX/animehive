@@ -50,7 +50,7 @@ def echo_thread(update, context):
                     anime["title"], anime["type"], anime["status"], "{} {}".format(anime["season"], anime["year"])), reply_markup=InlineKeyboardMarkup(markup))
     elif last_command == "download":
         title = update.message.text.strip()
-        anime_list = search_animeout(title)
+        anime_list = search_gogoanime(title)
         if len(anime_list) == 0:
             context.bot.send_message(
                 chat_id=chat_id, text=config["messages"]["empty_search"])
@@ -61,18 +61,10 @@ def echo_thread(update, context):
                 chat_id=chat_id, text="Displaying search results for {} 😁".format(title))
             for anime in anime_list:
                 try:
-                    href = anime["href"][25:-1]
-                    shortened_url = db.shortened_urls.find_one({"href": href})
-                    if shortened_url:
-                        shortened_url = str(shortened_url["_id"])
-                    else:
-                        shortened_url = db.shortened_urls.insert_one(
-                            {"href": href, "date": datetime.datetime.now()})
-                        shortened_url = str(shortened_url.inserted_id)
                     markup = [[InlineKeyboardButton(
-                        "Get Episodes 🚀", callback_data="d=" + shortened_url)]]
+                        "Get Episodes 🚀", callback_data="d=" + anime["href"])]]
                     context.bot.send_photo(
-                        chat_id=chat_id, caption=anime["title"], photo=anime["image"], reply_markup=InlineKeyboardMarkup(markup))
+                        chat_id=chat_id, caption=f"{anime['title']}\n{anime['released']}", photo=anime["image"], reply_markup=InlineKeyboardMarkup(markup))
                 except:
                     pass
     elif last_command == "get_info":
