@@ -27,7 +27,7 @@ def send_episodes(episodes, first, chat_id, context):
             if download_url:
                 download_url = download_url["download_url"]
             else:
-                download_url = get_download_url(i)
+                download_url = get_animeout_download(i)
                 db.anime.insert_one({
                     "href": i,
                     "download_url": download_url,
@@ -230,7 +230,7 @@ def button(update, context):
     query_data = update.callback_query.data
     if query_data.split("=")[0] == "r":
         try:
-            title, recommendations = fetch_recommendations(
+            title, recommendations = fetch_animepahe_recommendations(
                 query_data.split("=")[1])
             if len(recommendations) == 0:
                 context.bot.send_message(
@@ -250,7 +250,7 @@ def button(update, context):
         href = "https://animeout.xyz/" + \
             db.shortened_urls.find_one(
                 {"_id": ObjectId(query_data.split("=")[1])})["href"]
-        episodes = fetch_episodes(href)
+        episodes = fetch_animeout_episodes(href)
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["download_pagination"].format(len(episodes)))
         thread = threading.Thread(target=send_episode_list, args=[
@@ -260,7 +260,7 @@ def button(update, context):
         href = "https://animeout.xyz/" + \
             db.shortened_urls.find_one(
                 {"_id": ObjectId(query_data.split("=")[1])})["href"]
-        episodes = fetch_episodes(href)
+        episodes = fetch_animeout_episodes(href)
         start = int(query_data.split("=")[-1])
         thread = threading.Thread(target=send_episodes, args=[
             episodes, start, chat_id, context])
@@ -268,7 +268,7 @@ def button(update, context):
     if query_data.split("=")[0] == "i":
         db.info.insert_one({"chat_id": chat_id, "anime": query_data.split("=")[
                            1], "date": datetime.datetime.now()})
-        anime_info = fetch_anime_info(query_data.split("=")[1])
+        anime_info = fetch_animepahe_info(query_data.split("=")[1])
         markup = [[InlineKeyboardButton(
             "Get Recommendations 🚀", callback_data="r=" + query_data.split("=")[1])]]
         context.bot.send_photo(chat_id=chat_id, photo=anime_info["poster"])

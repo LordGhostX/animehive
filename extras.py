@@ -1,27 +1,15 @@
-import os
 import requests
 from bs4 import BeautifulSoup
 
 
-def parse_anime_name(name):
-    new_name = ("]".join(name.split("]")[1:2]) + "]").strip()
-    if new_name in ["[RapidBot]", "[]"]:
-        new_name = os.path.basename(name)
-    return new_name
-
-
 def search_animepahe(title):
-    params = {
-        "m": "search",
-        "l": 8,
-        "q": title
-    }
-    r = requests.get("https://animepahe.com/api", params=params).json()
+    r = requests.get(
+        f"https://animepahe.com/api?m=search&l=8&q={title}").json()
     return r.get("data", [])
 
 
-def fetch_recommendations(anime_session, limit=5):
-    r = requests.get("https://animepahe.com/anime/" + anime_session)
+def fetch_animepahe_recommendations(anime_session, limit=5):
+    r = requests.get(f"https://animepahe.com/anime/{anime_session}")
     page = BeautifulSoup(r.text, "html.parser")
     title = page.find("div", {"class": "title-wrapper"}
                       ).find("h1").text.strip()
@@ -42,8 +30,7 @@ def fetch_recommendations(anime_session, limit=5):
 
 
 def search_animeout(title):
-    params = {"s": title}
-    r = requests.get("https://www.animeout.xyz/", params=params)
+    r = requests.get(f"https://www.animeout.xyz?s={title}")
     page = BeautifulSoup(r.text, "html.parser")
 
     search_result = []
@@ -62,7 +49,7 @@ def search_animeout(title):
     return search_result
 
 
-def fetch_episodes(href):
+def fetch_animeout_episodes(href):
     r = requests.get(href)
     page = BeautifulSoup(r.text, "html.parser")
     episodes = []
@@ -75,7 +62,7 @@ def fetch_episodes(href):
     return episodes
 
 
-def get_download_url(href):
+def get_animeout_download(href):
     r = requests.get(href)
     pre_download_page = BeautifulSoup(r.text, "html.parser")
     pre_download_url = pre_download_page.find("a", {"class": "btn"})["href"]
@@ -87,8 +74,8 @@ def get_download_url(href):
     return download_url
 
 
-def fetch_anime_info(session):
-    r = requests.get("https://animepahe.com/anime/" + session)
+def fetch_animepahe_info(session):
+    r = requests.get(f"https://animepahe.com/anime/{session}")
     page = BeautifulSoup(r.text, "html.parser")
     try:
         poster = page.find("a", {"class": "youtube-preview"})["href"]
