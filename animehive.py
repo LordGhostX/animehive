@@ -4,7 +4,6 @@ import threading
 from multiprocessing import Pool
 import pymongo
 import telegram
-from bson.objectid import ObjectId
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import CallbackQueryHandler
@@ -121,39 +120,26 @@ def button_thread(update, context):
             context.bot.send_message(
                 chat_id=chat_id, text=config["messages"]["empty_recommendation"])
     if query_data.split("=")[0] == "d":
-        href = "https://animeout.xyz/" + \
-            db.shortened_urls.find_one(
-                {"_id": ObjectId(query_data.split("=")[1])})["href"]
-        episodes = fetch_animeout_episodes(href)
+        total_episodes, alias, anime_id = fetch_gogoanime_anime(
+            query_data.split("=")[1])
         context.bot.send_message(
-            chat_id=chat_id, text=config["messages"]["download_pagination"].format(len(episodes)))
-        for i in range(0, len(episodes), 15):
+            chat_id=chat_id, text=config["messages"]["download_pagination"].format(total_episodes))
+        for i in range(0, total_episodes, 10):
             markup = [[InlineKeyboardButton(
-                "Get Episodes 🚀", callback_data="f={}={}".format(query_data.split("=")[1], i))]]
+                "Get Episodes 🚀", callback_data="f={}={}={}".format(alias, anime_id, i))]]
             context.bot.send_message(
-                chat_id=chat_id, text="Download Episodes {} - {}".format(i + 1, min(i + 15, len(episodes))), reply_markup=InlineKeyboardMarkup(markup))
+                chat_id=chat_id, text="Download Episodes {} - {}".format(i + 1, min(i + 10, total_episodes)), reply_markup=InlineKeyboardMarkup(markup))
     if query_data.split("=")[0] == "f":
-        href = "https://animeout.xyz/" + \
-            db.shortened_urls.find_one(
-                {"_id": ObjectId(query_data.split("=")[1])})["href"]
-        episodes = fetch_animeout_episodes(href)
-        start = int(query_data.split("=")[-1])
-        for i in episodes[start:start + 15]:
+        start = int(query_data.split("=")[3])
+        alias = query_data.split("=")[1]
+        episodes = fetch_gogoanime_episodes(
+            start, start + 9, alias, query_data.split("=")[2])
+        for i in episodes:
             try:
-                download_url = db.anime.find_one({"href": i})
-                if download_url:
-                    download_url = download_url["download_url"]
-                else:
-                    download_url = fetch_animeout_download(i)
-                    db.anime.insert_one({
-                        "href": i,
-                        "download_url": download_url,
-                        "date": datetime.datetime.now()
-                    })
                 markup = [[InlineKeyboardButton(
-                    "Download Episode 🔥", url=download_url)]]
+                    "Get Download Links 🔥", callback_data="g={}".format(i["href"]))]]
                 context.bot.send_message(
-                    chat_id=chat_id, text=download_url, reply_markup=InlineKeyboardMarkup(markup))
+                    chat_id=chat_id, text=f"{alias} {i['name']}", reply_markup=InlineKeyboardMarkup(markup))
             except:
                 pass
     if query_data.split("=")[0] == "i":
