@@ -142,6 +142,9 @@ def button_thread(update, context):
                     chat_id=chat_id, text=f"{alias} {i['name']}", reply_markup=InlineKeyboardMarkup(markup))
             except:
                 pass
+    if query_data.split("=")[0] == "g":
+        download_links = fetch_gogoanime_download(query_data.split("=")[1])
+        print(download_links)
     if query_data.split("=")[0] == "i":
         db.info.insert_one({"chat_id": chat_id, "anime": query_data.split("=")[
                            1], "date": datetime.datetime.now()})
