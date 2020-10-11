@@ -146,6 +146,12 @@ def button_thread(update, context):
     if query_data.split("=")[0] == "g":
         anime_title, download_links = fetch_gogoanime_download(
             query_data.split("=")[1])
+        db.downloaded_anime.insert_one({
+            "title": anime_title,
+            "chat_id": chat_id,
+            "href": "https://gogoanime.so" + query_data.split("=")[1],
+            "date": datetime.datetime.now()
+        })
         for i in download_links:
             try:
                 markup = [[InlineKeyboardButton(
@@ -188,7 +194,7 @@ def donate(update, context):
 def help(update, context):
     chat_id = update.effective_chat.id
     total_users = db.users.count_documents({})
-    total_downloaded = db.anime.count_documents({})
+    total_downloaded = db.downloaded_anime.count_documents({})
     total_recommendations = db.recommendations.count_documents({})
     total_info = db.info.count_documents({})
     context.bot.send_message(
