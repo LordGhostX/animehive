@@ -144,6 +144,8 @@ def fetch_gogoanime_episodes(start, end, alias, anime_id):
 def fetch_gogoanime_download(href):
     r = requests.get(f"https://gogoanime.so{href}")
     pre_download_page = BeautifulSoup(r.text, "html.parser")
+    anime_title = pre_download_page.find(
+        "div", {"class": "title_name"}).text.strip()
     pre_download_url = pre_download_page.find(
         "li", {"class": "dowloads"}).find("a")["href"]
 
@@ -159,4 +161,4 @@ def fetch_gogoanime_download(href):
             })
         except:
             pass
-    return download_links
+    return anime_title, download_links
