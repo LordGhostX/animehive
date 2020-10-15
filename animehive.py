@@ -27,6 +27,18 @@ def launch_broadcast(args):
         pass
 
 
+def latest_anime(context, chat_id):
+    anime_list = fetch_gogoanime_latest()
+    for anime in anime_list:
+        try:
+            markup = [[InlineKeyboardButton(
+                "Download Anime 🚀", callback_data="d=" + anime["href"])]]
+            context.bot.send_photo(
+                chat_id=chat_id, caption=f"{anime['name']} {anime['episode']}", photo=anime["image"], reply_markup=InlineKeyboardMarkup(markup))
+        except:
+            pass
+
+
 def echo_thread(update, context):
     chat_id = update.effective_chat.id
     bot_user = db.users.find_one({"chat_id": chat_id})
@@ -191,6 +203,13 @@ def donate(update, context):
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
 
 
+def latest(update, context):
+    chat_id = update.effective_chat.id
+    thread = threading.Thread(target=latest_anime, args=[context, chat_id])
+    thread.start()
+    db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
+
+
 def help(update, context):
     chat_id = update.effective_chat.id
     total_users = db.users.count_documents({})
@@ -252,6 +271,8 @@ donate_handler = CommandHandler("donate", donate)
 dispatcher.add_handler(donate_handler)
 help_handler = CommandHandler("help", help)
 dispatcher.add_handler(help_handler)
+latest_handler = CommandHandler("latest", latest)
+dispatcher.add_handler(latest_handler)
 recommend_handler = CommandHandler("recommend", recommend)
 dispatcher.add_handler(recommend_handler)
 download_handler = CommandHandler("download", download)

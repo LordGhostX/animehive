@@ -162,3 +162,21 @@ def fetch_gogoanime_download(href):
         except:
             pass
     return anime_title, download_links
+
+
+def fetch_gogoanime_latest(limit=10):
+    r = requests.get("https://gogoanime.so/")
+    page = BeautifulSoup(r.text, "html.parser")
+
+    latest_items = []
+    for item in page.find("div", {"class": "last_episodes"}).find_all("li")[:limit]:
+        try:
+            latest_items.append({
+                "href": item.find("a")["href"],
+                "name": item.find("p").text.strip(),
+                "episode": item.find("p", {"class": "episode"}).text.strip(),
+                "image": item.find("img")["src"]
+            })
+        except:
+            pass
+    return latest_items
