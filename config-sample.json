@@ -20,6 +20,7 @@
     "donate": "AnimeHive is an open-source project (https://github.com/lordghostx/animehive) and free to use meaning you don't ever pay to use the service. However, we accept donations to keep our servers and scrapers working. Feel free to donate to the service with cryptocurrency ❤️\n\nBitcoin: 1KjA4Q8e13cKawahZC6PzBjsQTY145vK3J\n\nEthereum: 0x80aa0F0BF45C36F04188C42199D38B5584991608\n\nLitecoin: ltc1q940edxufgmhxx5fhanxapajdaecscngv8nkc3v\n\nBitcoin Cash: qzwaw3m0ndk8suk59ppvs9p9n2rynrzgtggsa0xjg5",
     "get_info": "Enter the anime you want to get info for 😎",
     "anime_info": "{}\n\n{}\n{}\n{}\n{}\n{}\n{}\nGenre: {}",
+    "select_episode": "Select the episode you want to download 😁",
     "broadcast": "Enter the message you want to broadcast to all {} users 🤖"
   }
 }
