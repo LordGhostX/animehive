@@ -5,6 +5,7 @@ import threading
 from multiprocessing import Pool
 import pymongo
 import telegram
+from telegram import KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import CallbackQueryHandler
@@ -185,7 +186,10 @@ def start(update, context):
             {"chat_id": chat_id, "last_command": None, "admin": False, "date": datetime.datetime.now()})
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["start"].format(first_name))
-    context.bot.send_message(chat_id=chat_id, text=config["messages"]["menu"])
+    markup = ReplyKeyboardMarkup([[KeyboardButton("/download"), KeyboardButton("/recommend"), KeyboardButton("/latest")], [
+                                 KeyboardButton("/info"), KeyboardButton("/donate"), KeyboardButton("/help")]], resize_keyboard=True)
+    context.bot.send_message(
+        chat_id=chat_id, text=config["messages"]["menu"], reply_markup=markup)
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
 
 
